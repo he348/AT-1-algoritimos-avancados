@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const teclado = document.getElementById("teclado");
     const labelSenha = document.getElementById("label-senha");
     const senhaDigitada = document.getElementById("senha-digitada");
+    const usernameInput = document.getElementById("username");
 
     // Função para gerar pares aleatórios de números de 0 a 9 sem repetição
     function gerarParesAleatorios() {
@@ -36,8 +37,10 @@ document.addEventListener("DOMContentLoaded", function() {
         botao.addEventListener("click", function() {
             const numeros = par.split(" ou ");
             const numeroSelecionado = numeros[Math.floor(Math.random() * 2)];
-            senhaDigitada.textContent += numeroSelecionado;
-            labelSenha.textContent = "Senha digitada";
+            if (senhaDigitada.textContent.length < 4) { // Limite de 4 caracteres
+                senhaDigitada.textContent += numeroSelecionado;
+            }
+            labelSenha.textContent = "Senha digitada (" + senhaDigitada.textContent.length + "/4):";
         });
         teclado.appendChild(botao);
     });
@@ -45,9 +48,11 @@ document.addEventListener("DOMContentLoaded", function() {
     // Adicionar evento de clique ao botão "Acessar"
     document.getElementById("botao-acessar").addEventListener("click", function() {
         const senha = senhaDigitada.textContent;
+        const username = usernameInput.value;
+        console.log("Username:", username);
         console.log("Senha digitada:", senha);
-        // Lógica para enviar a senha para o backend e validar
-        // Aqui você pode fazer uma requisição AJAX para enviar a senha para o servidor
+        // Lógica para enviar o nome de usuário e senha para o backend e validar
+        // Aqui você pode fazer uma requisição AJAX para enviar os dados para o servidor
         // e realizar a validação
     });
 
@@ -55,5 +60,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("botao-apagar").addEventListener("click", function() {
         const senha = senhaDigitada.textContent;
         senhaDigitada.textContent = senha.slice(0, -1);
+        labelSenha.textContent = "Senha digitada (" + senhaDigitada.textContent.length + "/4):";
     });
 });

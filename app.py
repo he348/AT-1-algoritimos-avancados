@@ -38,5 +38,14 @@ def protegido():
     current_user = get_jwt_identity()
     return jsonify(logged_in_as=current_user), 200
 
+# Rota para receber a senha e o nome de usuário do frontend
+@app.route('/validar-senha', methods=['POST'])
+def validar_senha():
+    username = request.json.get('username', None)
+    senha = request.json.get('senha', None)
+    # Lógica para validar a senha no backend com os dados do banco de dados
+    # Aqui você pode fazer a consulta no banco de dados para verificar se a senha está correta
+    return jsonify({"msg": "Senha validada"}), 200
+
 if __name__ == '__main__':
     app.run(debug=True)
