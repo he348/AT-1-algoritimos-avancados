@@ -7,7 +7,7 @@ body {
 .container {
     margin: 50px auto;
     padding: 20px;
-    width: 300px;
+    width: 320px;
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
@@ -15,7 +15,7 @@ body {
 }
 
 h1 {
-    margin: 0;
+    margin: 10px 0;
     color: #333;
 }
 
@@ -24,10 +24,28 @@ p {
     color: #666;
 }
 
+.username-input {
+    margin-bottom: 20px;
+}
+
+.username-input label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.username-input input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
 .teclado {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    margin-bottom: 20px;
 }
 
 .botao {
@@ -46,6 +64,24 @@ p {
 
 .botao:hover {
     background-color: #ccc;
+}
+
+.botao-apagar {
+    width: 100px;
+    margin: 0 auto 20px auto;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #dc3545;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+.botao-apagar:hover {
+    background-color: #c82333;
 }
 
 .botao-acessar {
@@ -71,4 +107,10 @@ p {
     padding: 10px;
     background-color: #f0f0f0;
     border-radius: 5px;
+}
+
+label {
+    margin-top: 10px;
+    display: block;
+    color: #333;
 }
