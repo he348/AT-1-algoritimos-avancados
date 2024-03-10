@@ -45,15 +45,41 @@ document.addEventListener("DOMContentLoaded", function() {
         teclado.appendChild(botao);
     });
 
-    // Adicionar evento de clique ao botão "Acessar"
     document.getElementById("botao-acessar").addEventListener("click", function() {
         const senha = senhaDigitada.textContent;
         const username = usernameInput.value;
-        console.log("Username:", username);
-        console.log("Senha digitada:", senha);
-        // Lógica para enviar o nome de usuário e senha para o backend e validar
-        // Aqui você pode fazer uma requisição AJAX para enviar os dados para o servidor
-        // e realizar a validação
+        if (username.length === 0 || senha.length !== 4) {
+            alert("Preencher username ou senha");
+        } else {
+            // Dados para enviar para o backend
+            const dados = {
+                username: username,
+                password: senha
+            };
+    
+            // Faz a requisição AJAX
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Se a resposta for bem-sucedida, redireciona para a página protegida
+                    window.location.href = '/protegido';
+                } else {
+                    // Se houver erro de autenticação, exibe uma mensagem de erro
+                    return response.json().then(data => {
+                        alert(data.msg);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+            });
+        }
     });
 
     // Adicionar evento de clique ao botão "Apagar"
