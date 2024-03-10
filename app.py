@@ -43,8 +43,20 @@ def protegido():
 def validar_senha():
     username = request.json.get('username', None)
     senha = request.json.get('senha', None)
-    # Lógica para validar a senha no backend com os dados do banco de dados
-    # Aqui você pode fazer a consulta no banco de dados para verificar se a senha está correta
+
+    # Verifica as credenciais no banco de dados
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT senha FROM users WHERE username = %s', (username,))
+    user = cursor.fetchone()
+    cursor.close()
+
+    if not user:
+        return jsonify({"msg": "Usuário não encontrado"}), 404
+
+    # Verifica se a senha fornecida corresponde à senha no banco de dados
+    if senha != user['senha']:
+        return jsonify({"msg": "Senha incorreta"}), 401
+
     return jsonify({"msg": "Senha validada"}), 200
 
 if __name__ == '__main__':

@@ -42,10 +42,17 @@ p {
 }
 
 .teclado {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); /* Distribui automaticamente as colunas com um tamanho mínimo de 50px */
+    gap: 5px; /* Adiciona espaçamento entre as teclas */
+    justify-content: center; /* Centraliza o conteúdo horizontalmente */
     margin-bottom: 20px;
+}
+
+/* Adicione qualquer outro estilo específico necessário para as teclas dentro do teclado */
+.tecla {
+    width: 100%; /* Ocupa todo o espaço disponível na coluna */
+    height: 50px; /* Altura da tecla */
 }
 
 .botao {
@@ -75,7 +82,7 @@ p {
     font-size: 16px;
     text-align: center;
     cursor: pointer;
-    background-color: #dc3545;
+    background-color: #dc3546de;
     color: #fff;
     transition: background-color 0.3s ease;
 }
@@ -93,13 +100,13 @@ p {
     font-size: 16px;
     text-align: center;
     cursor: pointer;
-    background-color: #007bff;
+    background-color: #d45d02;
     color: #fff;
     transition: background-color 0.3s ease;
 }
 
 .botao-acessar:hover {
-    background-color: #0056b3;
+    background-color: #c24a12;
 }
 
 #senha-digitada {
