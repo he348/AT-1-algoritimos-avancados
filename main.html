@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teclado Virtual</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Teclado Virtual</h1>
+        <div class="username-input">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username">
+        </div>
+        <div class="teclado" id="teclado">
+            <!-- Botões gerados dinamicamente aqui -->
+        </div>
+        <button class="botao-apagar" id="botao-apagar">Apagar</button>
+        <p>Digite sua senha eletrônica:</p>
+        <div id="senha-digitada"></div>
+        <label for="senha-digitada" id="label-senha">Senha digitada:</label>
+        <button class="botao-acessar" id="botao-acessar">Acessar</button>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
