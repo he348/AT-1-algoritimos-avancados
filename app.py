@@ -12,10 +12,10 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
 app.config['JWT_SECRET_KEY'] = 'your-secret-key'
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'username'
-app.config['MYSQL_PASSWORD'] = 'password'
-app.config['MYSQL_DB'] = 'database_name'
+app.config['MYSQL_HOST'] = '127.0.0.1'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'admin'
+app.config['MYSQL_DB'] = 'Localhost'
 app.config['SECRET_KEY'] = 'your-secret-key'  # Chave secreta para o Flask-WTF
 
 mysql = MySQL(app)
