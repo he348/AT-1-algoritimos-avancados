@@ -1,3 +1,4 @@
+/* Estilos gerais para o body e container */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -14,84 +15,22 @@ body {
     text-align: center;
 }
 
+/* Estilos para títulos */
 h1 {
     margin: 10px 0;
     color: #333;
 }
 
-p {
-    margin-bottom: 20px;
-    color: #666;
-}
-
-.username-input {
-    margin-bottom: 20px;
-}
-
-.username-input label {
-    display: block;
-    margin-bottom: 5px;
-    color: #333;
-}
-
-.username-input input {
+/* Estilos para inputs */
+input {
     width: 100%;
     padding: 8px;
-    border: 1px solid #ccc;
+    border: 1px solid #e28356;
     border-radius: 5px;
 }
 
-.teclado {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); /* Distribui automaticamente as colunas com um tamanho mínimo de 50px */
-    gap: 5px; /* Adiciona espaçamento entre as teclas */
-    justify-content: center; /* Centraliza o conteúdo horizontalmente */
-    margin-bottom: 20px;
-}
-
-/* Adicione qualquer outro estilo específico necessário para as teclas dentro do teclado */
-.tecla {
-    width: 100%; /* Ocupa todo o espaço disponível na coluna */
-    height: 50px; /* Altura da tecla */
-}
-
-.botao {
-    width: 50px;
-    height: 50px;
-    margin: 5px;
-    border: none;
-    border-radius: 5px;
-    font-size: 18px;
-    text-align: center;
-    cursor: pointer;
-    background-color: #e0e0e0;
-    color: #333;
-    transition: background-color 0.3s ease;
-}
-
-.botao:hover {
-    background-color: #ccc;
-}
-
-.botao-apagar {
-    width: 100px;
-    margin: 0 auto 20px auto;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    text-align: center;
-    cursor: pointer;
-    background-color: #dc3546de;
-    color: #fff;
-    transition: background-color 0.3s ease;
-}
-
-.botao-apagar:hover {
-    background-color: #c82333;
-}
-
-.botao-acessar {
+/* Estilos para botões */
+button {
     width: 200px;
     margin-top: 20px;
     padding: 10px;
@@ -102,23 +41,40 @@ p {
     cursor: pointer;
     background-color: #d45d02;
     color: #fff;
+
     transition: background-color 0.3s ease;
 }
 
-.botao-acessar:hover {
+/* Estilo para o botão quando estiver desabilitado */
+.botao-acessar:disabled {
+    background-color: #ccc; /* Cor de fundo cinza */
+    opacity: 0.5; /* Opacidade reduzida */
+    cursor: not-allowed; /* Cursor não permitido */
+}
+
+
+button:hover {
     background-color: #c24a12;
 }
 
-#senha-digitada {
-    margin-top: 20px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border-radius: 5px;
-    font-family: "Courier New", Courier, monospace; /* Define uma fonte monoespaçada */
+/* Estilos específicos para a tela de inserção de username */
+.username-input {
+    margin-bottom: 20px;
 }
 
-label {
-    margin-top: 10px;
+.username-input label {
     display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+/* Estilos específicos para a tela de inserção da senha */
+.senha-input {
+    margin-bottom: 20px;
+}
+
+.senha-input label {
+    display: block;
+    margin-bottom: 5px;
     color: #333;
 }
