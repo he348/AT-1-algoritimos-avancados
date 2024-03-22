@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, render_template
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_mysqldb import MySQL
 from flask_bcrypt import Bcrypt
-from MySQLdb import escape_string  # Importando a função escape_string
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
