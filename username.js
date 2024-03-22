@@ -14,9 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Verificar se o username é válido (por exemplo, não contém caracteres especiais)
     function usernameValido(username) {
-        // Aqui você pode adicionar a lógica para validar o formato do username
-        // Por exemplo, verificar se contém apenas letras e números
-        // Neste exemplo simples, vamos apenas verificar se o username contém pelo menos um caractere alfanumérico
+        // Verificar se o username contém pelo menos um caractere alfanumérico
         return /[a-zA-Z0-9]/.test(username);
     }
 

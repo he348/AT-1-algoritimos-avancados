@@ -59,6 +59,37 @@ def protegido():
     current_user = get_jwt_identity()
     return jsonify(logged_in_as=current_user), 200
 
+# Rota para verificar se o usuário existe
+@app.route('/verificar-usuario', methods=['GET'])
+def verificar_usuario():
+    # Recupera o username da consulta
+    username = request.args.get('username')
+
+    # Validação e sanitização dos dados recebidos
+    username = escape_string(username)
+
+    # Verifica se o username foi fornecido na consulta
+    if not username:
+        return jsonify({"error": "Username não fornecido"}), 400
+
+    # Conecta ao banco de dados
+    cursor = mysql.connection.cursor()
+
+    # Executa a consulta para verificar se o usuário existe
+    cursor.execute('SELECT COUNT(*) FROM usuarios WHERE username = %s', (username,))
+    count = cursor.fetchone()[0]
+
+    # Fecha a conexão com o banco de dados
+    cursor.close()
+
+    # Verifica se o usuário foi encontrado no banco de dados
+    if count > 0:
+        return jsonify({"msg": "Usuário encontrado"}), 200
+    else:
+        return jsonify({"msg": "Usuário não encontrado"}), 404
+
+
+
 # Rota para validar a senha recebida do frontend
 @app.route('/validar-senha', methods=['POST'])
 def validar_senha():
