@@ -7,6 +7,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
 from flask_talisman import Talisman
 from flask_debugtoolbar import DebugToolbarExtension
+from logging.handlers import RotatingFileHandler
 import logging
 
 app = Flask(__name__)
@@ -39,6 +40,13 @@ toolbar = DebugToolbarExtension(app)
 
 # Configurando o nível de log para DEBUG
 app.logger.setLevel(logging.DEBUG)
+
+# Configuração do logger
+handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=1)
+handler.setLevel(logging.DEBUG)  # Nível de log para DEBUG
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+app.logger.addHandler(handler)
 
 # Configurando o logger para registrar mensagens de erro em um arquivo
 handler = logging.FileHandler('error.log')
