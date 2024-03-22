@@ -77,6 +77,7 @@ def verificar_usuario():
     username = request.args.get('username')
 
     if not username:
+        app.logger.error('Username não fornecido na solicitação GET')
         return jsonify({"error": "Username não fornecido"}), 400
 
     cursor = mysql.connection.cursor()
@@ -85,8 +86,10 @@ def verificar_usuario():
     cursor.close()
 
     if count > 0:
+        app.logger.info('Usuário encontrado: %s', username)
         return jsonify({"msg": "Usuário encontrado"}), 200
     else:
+        app.logger.warning('Usuário não encontrado: %s', username)
         return jsonify({"msg": "Usuário não encontrado"}), 404
 
 
