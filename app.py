@@ -34,20 +34,17 @@ Talisman(app, content_security_policy=csp)
 # Rota para fazer login e gerar o token JWT
 @app.route('/login', methods=['POST'])
 def login():
-     # Validação e sanitização dos dados recebidos
-    username = escape_string(request.json.get('username', ''))
-    password = escape_string(request.json.get('password', ''))
+    username = request.json.get('username', '')
+    password = request.json.get('password', '')
 
-     # Verifica as credenciais no banco de dados
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT * FROM usuarios WHERE username = %s', (username,))
     user = cursor.fetchone()
     cursor.close()
 
-    if not user or not bcrypt.check_password_hash(user['senha'], password):
+    if not user or not bcrypt.check_password_hash(user[3], password):
         return jsonify({"msg": "Credenciais inválidas"}), 401
 
-    # Cria um token JWT válido por 1 hora
     access_token = create_access_token(identity=username)
     return jsonify(access_token=access_token), 200
 
@@ -62,45 +59,28 @@ def protegido():
 # Rota para verificar se o usuário existe
 @app.route('/verificar-usuario', methods=['GET'])
 def verificar_usuario():
-    # Recupera o username da consulta
     username = request.args.get('username')
 
-    # Validação e sanitização dos dados recebidos
-    username = escape_string(username)
-
-    # Verifica se o username foi fornecido na consulta
     if not username:
         return jsonify({"error": "Username não fornecido"}), 400
 
-    # Conecta ao banco de dados
     cursor = mysql.connection.cursor()
-
-    # Executa a consulta para verificar se o usuário existe
     cursor.execute('SELECT COUNT(*) FROM usuarios WHERE username = %s', (username,))
     count = cursor.fetchone()[0]
-
-    # Fecha a conexão com o banco de dados
     cursor.close()
 
-    # Verifica se o usuário foi encontrado no banco de dados
     if count > 0:
         return jsonify({"msg": "Usuário encontrado"}), 200
     else:
         return jsonify({"msg": "Usuário não encontrado"}), 404
 
 
-
 # Rota para validar a senha recebida do frontend
 @app.route('/validar-senha', methods=['POST'])
 def validar_senha():
-    username = request.json.get('username', None)
-    senha = request.json.get('senha', None)
+    username = request.json.get('username', '')
+    senha = request.json.get('senha', '')
 
-  # Validação e sanitização dos dados recebidos
-    username = escape_string(username)
-    senha = escape_string(senha)
-
-    # Verifica as credenciais no banco de dados
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT senha FROM usuarios WHERE username = %s', (username,))
     result = cursor.fetchone()
@@ -109,7 +89,7 @@ def validar_senha():
     if not result:
         return jsonify({"msg": "Usuário não encontrado"}), 404
 
-    stored_hash = result[0]  # A senha está na primeira posição da tupla
+    stored_hash = result[0]
     if not bcrypt.check_password_hash(stored_hash, senha):
         return jsonify({"msg": "Senha incorreta"}), 401
 
@@ -118,31 +98,19 @@ def validar_senha():
 # Rota para recuperar a senha do usuário
 @app.route('/senha-do-usuario', methods=['GET'])
 def senha_do_usuario():
-    # Recupera o username da consulta
     username = request.args.get('username')
 
-    # Validação e sanitização dos dados recebidos
-    username = escape_string(username)
-
-    # Verifica se o username foi fornecido na consulta
     if not username:
         return jsonify({"error": "Username não fornecido"}), 400
 
-    # Conecta ao banco de dados
     cursor = mysql.connection.cursor()
-
-    # Executa a consulta para recuperar a senha do usuário
     cursor.execute('SELECT senha FROM usuarios WHERE username = %s', (username,))
     senha = cursor.fetchone()
-
-    # Fecha a conexão com o banco de dados
     cursor.close()
 
-    # Verifica se o usuário foi encontrado no banco de dados
     if not senha:
         return jsonify({"error": "Usuário não encontrado"}), 404
 
-    # Retorna a senha do usuário como uma resposta JSON
     return jsonify({"senha": senha[0]}), 200
 
 # Definindo um formulário de login com Flask-WTF
