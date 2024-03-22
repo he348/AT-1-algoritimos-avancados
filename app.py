@@ -6,6 +6,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
 from flask_talisman import Talisman
+from flask_debugtoolbar import DebugToolbarExtension
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -16,9 +17,24 @@ app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'admin'
 app.config['MYSQL_DB'] = 'Localhost'
 app.config['SECRET_KEY'] = 'your-secret-key'  # Chave secreta para o Flask-WTF
+app.config['DEBUG_TB_ENABLED'] = True
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+app.config['DEBUG_TB_PROFILER_ENABLED'] = True
+app.config['DEBUG_TB_TEMPLATE_EDITOR_ENABLED'] = True
+app.config['DEBUG_TB_PANELS'] = (
+    'flask_debugtoolbar.panels.versions.VersionDebugPanel',
+    'flask_debugtoolbar.panels.timer.TimerDebugPanel',
+    'flask_debugtoolbar.panels.headers.HeaderDebugPanel',
+    'flask_debugtoolbar.panels.request_vars.RequestVarsDebugPanel',
+    'flask_debugtoolbar.panels.config_vars.ConfigVarsDebugPanel',
+    'flask_debugtoolbar.panels.template.TemplateDebugPanel',
+    'flask_debugtoolbar.panels.logger.LoggingPanel',
+    'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel',
+)
 
 mysql = MySQL(app)
 jwt = JWTManager(app)
+toolbar = DebugToolbarExtension(app)
 
 # Definindo a CSP (Política de Segurança de Conteúdo)
 csp = {
