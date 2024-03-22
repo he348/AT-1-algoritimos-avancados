@@ -3,19 +3,18 @@ document.addEventListener("DOMContentLoaded", function() {
     const senhaInput = document.getElementById("senha-digitada-input");
 
     // Função para buscar a senha do usuário no backend
-    function buscarSenhaDoUsuario(username) {
-        return fetch(`/senha-do-usuario?username=${username}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro ao recuperar a senha do usuário');
-                }
-                return response.json();
-            })
-            .then(data => data.senha)
-            .catch(error => {
-                console.error('Erro ao recuperar a senha do usuário:', error);
-                return null; // Retorna null em caso de erro
-            });
+    async function buscarSenhaDoUsuario(username) {
+        try {
+            const response = await fetch(`/senha-do-usuario?username=${username}`);
+            if (!response.ok) {
+                throw new Error('Erro ao recuperar a senha do usuário');
+            }
+            const data = await response.json();
+            return data.senha;
+        } catch (error) {
+            console.error('Erro ao recuperar a senha do usuário:', error);
+            return null;
+        }
     }
 
     document.getElementById("botao-username").addEventListener("click", function() {
@@ -98,18 +97,17 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("senha-digitada").value = "";
         });
     
-        function buscarSenhaDoUsuario(username) {
-            return fetch(`/senha-do-usuario?username=${username}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erro ao recuperar a senha do usuário');
-                    }
-                    return response.json();
-                })
-                .then(data => data.senha)
-                .catch(error => {
-                    console.error('Erro ao recuperar a senha do usuário:', error);
-                    return null;
-                });
+        async function buscarSenhaDoUsuario(username) {
+            try {
+                const response = await fetch(`/senha-do-usuario?username=${username}`);
+                if (!response.ok) {
+                    throw new Error('Erro ao recuperar a senha do usuário');
+                }
+                const data = await response.json();
+                return data.senha;
+            } catch (error) {
+                console.error('Erro ao recuperar a senha do usuário:', error);
+                return null;
+            }
         }
     });
