@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_mysqldb import MySQL
-
+from flask_bcrypt import Bcrypt
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
+
+
 app.config['JWT_SECRET_KEY'] = 'your-secret-key'
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'username'
@@ -19,11 +22,11 @@ def login():
     username = request.json.get('username', None)
     password = request.json.get('password', None)
     cursor = mysql.connection.cursor()
-    cursor.execute('SELECT * FROM users WHERE username = %s AND password = %s', (username, password))
+    cursor.execute('SELECT * FROM usuarios WHERE username = %s', (username,))
     user = cursor.fetchone()
     cursor.close()
 
-    if not user:
+    if not user or not bcrypt.check_password_hash(user['senha'], password):
         return jsonify({"msg": "Credenciais inválidas"}), 401
 
     # Cria um token JWT válido por 1 hora
@@ -46,15 +49,15 @@ def validar_senha():
 
     # Verifica as credenciais no banco de dados
     cursor = mysql.connection.cursor()
-    cursor.execute('SELECT senha FROM users WHERE username = %s', (username,))
-    user = cursor.fetchone()
+    cursor.execute('SELECT senha FROM usuarios WHERE username = %s', (username,))
+    result = cursor.fetchone()
     cursor.close()
 
-    if not user:
+    if not result:
         return jsonify({"msg": "Usuário não encontrado"}), 404
 
-    # Verifica se a senha fornecida corresponde à senha no banco de dados
-    if senha != user['senha']:
+    stored_hash = result[0]  # A senha está na primeira posição da tupla
+    if not bcrypt.check_password_hash(stored_hash, senha):
         return jsonify({"msg": "Senha incorreta"}), 401
 
     return jsonify({"msg": "Senha validada"}), 200
