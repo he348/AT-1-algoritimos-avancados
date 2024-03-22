@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    document.getElementById("botao-username").addEventListener("click", function() {
+    document.getElementById("botao-acessar-username").addEventListener("click", function() {
         const username = usernameInput.value;
         if (username.length === 0) {
             alert("Preencher o nome de usuário");
@@ -30,8 +30,8 @@ document.addEventListener("DOMContentLoaded", function() {
                         return;
                     }
                     // Atualizar para a próxima tela e preparar para inserir a senha
-                    document.getElementById("tela-username").style.display = "none";
-                    document.getElementById("tela-senha").style.display = "block";
+                    document.getElementById("username").style.display = "none";
+                    document.getElementById("senha-digitada").style.display = "block";
 
                     // Adicionar botões para inserir a senha
                     const teclado = document.getElementById("teclado");
