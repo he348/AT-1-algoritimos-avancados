@@ -7,6 +7,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
 from flask_talisman import Talisman
 from flask_debugtoolbar import DebugToolbarExtension
+import logging
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -35,6 +36,16 @@ app.config['DEBUG_TB_PANELS'] = (
 mysql = MySQL(app)
 jwt = JWTManager(app)
 toolbar = DebugToolbarExtension(app)
+
+# Configurando o nível de log para DEBUG
+app.logger.setLevel(logging.DEBUG)
+
+# Configurando o logger para registrar mensagens de erro em um arquivo
+handler = logging.FileHandler('error.log')
+handler.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+app.logger.addHandler(handler)
 
 # Definindo a CSP (Política de Segurança de Conteúdo)
 csp = {
@@ -75,7 +86,7 @@ def protegido():
 @app.route('/verificar-usuario', methods=['GET'])
 def verificar_usuario():
     username = request.args.get('username')
-
+    app.logger.debug(f'Acessando rota /verificar-usuario para o usuário {username}')
     if not username:
         app.logger.error('Username não fornecido na solicitação GET')
         return jsonify({"error": "Username não fornecido"}), 400
