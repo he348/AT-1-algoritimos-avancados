@@ -24,15 +24,18 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("botao-acessar-username").addEventListener("click", function() {
         const username = usernameInput.value.trim(); // Remove espaços em branco extras
         if (username.length === 0 || !usernameValido(username)) {
+            console.log("Username inválido:", username);
             alert("Insira um username válido");
         } else {
             // Verificar se o usuário existe no banco de dados
             fetch(`/verificar-usuario?username=${username}`)
                 .then(response => {
                     if (response.ok) {
+                        console.log("Usuário encontrado:", username);
                         // Se o usuário existe, redirecionar para a tela de inserção de senha com o username na URL
                         window.location.href = `/senha.html?username=${username}`;
                     } else {
+                        console.log("Usuário não encontrado:", username);
                         // Se o usuário não existe, exibir uma mensagem de erro
                         alert("Usuário não encontrado");
                     }
