@@ -18,7 +18,10 @@
         </div>
         <button class="botao-apagar" id="botao-apagar">Apagar</button>
         <p>Digite sua senha eletrônica:</p>
-        <div id="senha-digitada"></div>
+        <!-- Campo de senha -->
+        <input type="password" id="senha-digitada-input" name="senha-digitada" style="display: none;">
+        <!-- Campo de texto oculto para exibir a senha digitada como asteriscos -->
+        <input type="text" id="senha-digitada" style="display: inline-block;" readonly>
         <label for="senha-digitada" id="label-senha">Senha digitada:</label>
         <button class="botao-acessar" id="botao-acessar">Acessar</button>
     </div>

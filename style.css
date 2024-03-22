@@ -114,6 +114,7 @@ p {
     padding: 10px;
     background-color: #f0f0f0;
     border-radius: 5px;
+    font-family: "Courier New", Courier, monospace; /* Define uma fonte monoespaçada */
 }
 
 label {
