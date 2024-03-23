@@ -28,41 +28,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
         teclado.textContent = "";
 
-        if (Array.isArray(senhaDoBancoDeDados)) {
-            senhaDoBancoDeDados.forEach(digito => {
-                const botao = document.createElement("button");
-                botao.className = "botao-numero";
-                botao.textContent = digito;
-                botao.addEventListener("click", function() {
-                    if (senhaDigitadaInput.value.length < senhaDoBancoDeDados.length) {
-                        senhaDigitadaInput.value += digito;
-                        senhaDigitada.value += "*";
-                    }
-                });
-                teclado.appendChild(botao);
+        senhaDoBancoDeDados.split('').forEach(digito => {
+            const botao = document.createElement("button");
+            botao.className = "botao-numero";
+            botao.textContent = digito;
+            botao.addEventListener("click", function() {
+                if (senhaDigitadaInput.value.length < senhaDoBancoDeDados.length) {
+                    senhaDigitadaInput.value += digito;
+                    senhaDigitada.value += "*";
+                }
             });
-        } else if (typeof senhaDoBancoDeDados === 'string') {
-            console.log('Tipo de dado retornado:', typeof senhaDoBancoDeDados);
-            console.log('Valor retornado:', senhaDoBancoDeDados);
-            // Convertendo a string para um array
-            senhaDoBancoDeDados = senhaDoBancoDeDados.split(''); 
-            console.log('Senha convertida para array:', senhaDoBancoDeDados);
-
-            senhaDoBancoDeDados.forEach(digito => {
-                const botao = document.createElement("button");
-                botao.className = "botao-numero";
-                botao.textContent = digito;
-                botao.addEventListener("click", function() {
-                    if (senhaDigitadaInput.value.length < senhaDoBancoDeDados.length) {
-                        senhaDigitadaInput.value += digito;
-                        senhaDigitada.value += "*";
-                    }
-                });
-                teclado.appendChild(botao);
-            });
-        } else {
-            console.error('Formato de senha inválido');
-        }
+            teclado.appendChild(botao);
+        });
     })
     .catch(error => {
         console.error('Erro ao buscar senha do usuário:', error);

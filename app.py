@@ -6,6 +6,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
 from flask_talisman import Talisman
+from hashlib import sha256
 import os  # Adicionado para gerar a chave secreta
 import hashlib
 import secrets
@@ -45,6 +46,11 @@ def index():
 @app.route('/senha.html')
 def senha():
     return render_template('senha.html')
+
+# Essa função irá verificar se a senha digitada pelo usuário corresponde ao hash armazenado no banco de dados
+def verificar_senha(senha_digitada, senha_hash):
+    senha_digitada_hash = sha256(senha_digitada.encode()).hexdigest()
+    return senha_digitada_hash == senha_hash
 
 
 # Rota para fazer login e gerar o token JWT
@@ -128,14 +134,21 @@ def senha_do_usuario():
 
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT senha_hash FROM usuarios WHERE username = %s', (username,))
-    senha = cursor.fetchone()
+    senha_hash = cursor.fetchone()
     cursor.close()
 
-    if not senha:
+    if not senha_hash:
         return jsonify({"error": "Usuário não encontrado"}), 404
 
-    return jsonify({"senha": senha[0]}), 200
+    senha_digitada = request.args.get('senha')  # Senha digitada pelo usuário
 
+    # Verifica se a senha digitada corresponde ao hash armazenado no banco de dados
+    if verificar_senha(senha_digitada, senha_hash[0]):
+        # Senha correta
+        return jsonify({"senha": senha_digitada}), 200
+    else:
+        # Senha incorreta
+        return jsonify({"error": "Senha incorreta"}), 401
 
 # Rota para a primeira tela da aplicação
 @app.route('/username')
