@@ -41,6 +41,11 @@ Talisman(app, content_security_policy=csp)
 def index():
     return render_template('username.html')
 
+# Adicionado rota para página senha (senha.html)
+@app.route('/senha.html')
+def senha():
+    return render_template('senha.html')
+
 
 # Rota para fazer login e gerar o token JWT
 @app.route('/login', methods=['POST'])
