@@ -36,6 +36,12 @@ csp = {
 # Adicionando a extensão Talisman para implementar a CSP
 Talisman(app, content_security_policy=csp)
 
+# Adicionado rota para página inicial (username)
+@app.route('/')
+def index():
+    return render_template('username.html')
+
+
 # Rota para fazer login e gerar o token JWT
 @app.route('/login', methods=['POST'])
 def login():
