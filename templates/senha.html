@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inserir Senha</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
@@ -16,6 +16,6 @@
         <button class="botao-acessar" id="botao-acessar-senha">Acessar</button>
         
     </div>
-    <script src="senha.js"></script>
+    <script src="{{ url_for('static', filename='senha.js') }}"></script>
 </body>
 </html>

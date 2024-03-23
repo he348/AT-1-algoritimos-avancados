@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inserir Username</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
@@ -15,6 +15,6 @@
         </div>
         <button class="botao-acessar" id="botao-acessar-username">Próximo</button>
     </div>
-    <script src="username.js"></script>
+    <script src="{{ url_for('static', filename='username.js') }}"></script>
 </body>
 </html>
