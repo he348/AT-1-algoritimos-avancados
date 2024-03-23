@@ -98,7 +98,7 @@ def verificar_usuario():
 @app.route('/validar-senha', methods=['POST'])
 def validar_senha():
     username = request.json.get('username', '')
-    senha = request.json.get('senha', '')
+    senha_digitada = request.json.get('senha', '')
 
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT senha_hash FROM usuarios WHERE username = %s', (username,))
@@ -107,12 +107,13 @@ def validar_senha():
     if result is None:
         return jsonify({"msg": "Usuário não encontrado"}), 404
 
-    stored_hash = result[0]
+    senha_hash = result[0]
 
     # Verifica se o hash da senha armazenada no banco de dados corresponde à senha fornecida
-    if bcrypt.check_password_hash(stored_hash, senha):
+    if senha_digitada == senha_hash:
         # Senha correta
-        return jsonify({"msg": "Senha válida"}), 200
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token), 200
     else:
         # Senha incorreta
         return jsonify({"msg": "Senha incorreta"}), 401
