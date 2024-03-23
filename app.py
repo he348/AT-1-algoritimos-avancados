@@ -6,54 +6,25 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length
 from flask_talisman import Talisman
-from flask_debugtoolbar import DebugToolbarExtension
-from logging.handlers import RotatingFileHandler
-import logging
+import os  # Adicionado para gerar a chave secreta
+import hashlib
+import secrets
+import datetime
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
-app.config['JWT_SECRET_KEY'] = 'your-secret-key'
+app.config['JWT_SECRET_KEY'] = 'your-jwt-secret-key'
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'admin'
-app.config['MYSQL_DB'] = 'Localhost'
-app.config['SECRET_KEY'] = 'your-secret-key'  # Chave secreta para o Flask-WTF
-app.config['DEBUG_TB_ENABLED'] = True
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-app.config['DEBUG_TB_PROFILER_ENABLED'] = True
-app.config['DEBUG_TB_TEMPLATE_EDITOR_ENABLED'] = True
-app.config['DEBUG_TB_PANELS'] = (
-    'flask_debugtoolbar.panels.versions.VersionDebugPanel',
-    'flask_debugtoolbar.panels.timer.TimerDebugPanel',
-    'flask_debugtoolbar.panels.headers.HeaderDebugPanel',
-    'flask_debugtoolbar.panels.request_vars.RequestVarsDebugPanel',
-    'flask_debugtoolbar.panels.config_vars.ConfigVarsDebugPanel',
-    'flask_debugtoolbar.panels.template.TemplateDebugPanel',
-    'flask_debugtoolbar.panels.logger.LoggingPanel',
-    'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel',
-)
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'teclado_virtual'
+
+# Gera uma chave secreta aleatória para o Flask-WTF
+app.config['SECRET_KEY'] = os.urandom(24)
 
 mysql = MySQL(app)
 jwt = JWTManager(app)
-toolbar = DebugToolbarExtension(app)
-
-# Configurando o nível de log para DEBUG
-app.logger.setLevel(logging.DEBUG)
-
-# Configuração do logger
-handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=1)
-handler.setLevel(logging.DEBUG)  # Nível de log para DEBUG
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-app.logger.addHandler(handler)
-
-# Configurando o logger para registrar mensagens de erro em um arquivo
-handler = logging.FileHandler('error.log')
-handler.setLevel(logging.ERROR)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-app.logger.addHandler(handler)
 
 # Definindo a CSP (Política de Segurança de Conteúdo)
 csp = {
@@ -119,18 +90,21 @@ def validar_senha():
     senha = request.json.get('senha', '')
 
     cursor = mysql.connection.cursor()
-    cursor.execute('SELECT senha FROM usuarios WHERE username = %s', (username,))
+    cursor.execute('SELECT senha_hash FROM usuarios WHERE username = %s', (username,))
     result = cursor.fetchone()
-    cursor.close()
 
-    if not result:
+    if result is None:
         return jsonify({"msg": "Usuário não encontrado"}), 404
 
     stored_hash = result[0]
-    if not bcrypt.check_password_hash(stored_hash, senha):
-        return jsonify({"msg": "Senha incorreta"}), 401
 
-    return jsonify({"msg": "Senha validada"}), 200
+    # Verifica se o hash da senha armazenada no banco de dados corresponde à senha fornecida
+    if bcrypt.check_password_hash(stored_hash, senha):
+        # Senha correta
+        return jsonify({"msg": "Senha válida"}), 200
+    else:
+        # Senha incorreta
+        return jsonify({"msg": "Senha incorreta"}), 401
 
 # Rota para recuperar a senha do usuário
 @app.route('/senha-do-usuario', methods=['GET'])
@@ -141,7 +115,7 @@ def senha_do_usuario():
         return jsonify({"error": "Username não fornecido"}), 400
 
     cursor = mysql.connection.cursor()
-    cursor.execute('SELECT senha FROM usuarios WHERE username = %s', (username,))
+    cursor.execute('SELECT senha_hash FROM usuarios WHERE username = %s', (username,))
     senha = cursor.fetchone()
     cursor.close()
 
@@ -150,23 +124,21 @@ def senha_do_usuario():
 
     return jsonify({"senha": senha[0]}), 200
 
-# Definindo um formulário de login com Flask-WTF
-class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[InputRequired(), Length(min=4, max=20)])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=6, max=20)])
-    submit = SubmitField('Submit')
 
-# Rota para renderizar o formulário de login
-@app.route('/login_form', methods=['GET', 'POST'])
-def login_form():
-    form = LoginForm()
-    if form.validate_on_submit():
-        # Se o formulário for submetido e válido, você pode acessar os dados assim:
-        username = form.username.data
-        password = form.password.data
-
-    # Renderizar o template do formulário novamente, passando o formulário e as mensagens de erro
-    return render_template('login_form.html', form=form)
+# Rota para a primeira tela da aplicação
+@app.route('/username')
+def username():
+    # Gerar um ID de sessão aleatório
+    id_sessao = secrets.token_urlsafe(16)
+    data = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Inserir o ID de sessão na tabela de sessões
+    cursor = mysql.connection.cursor()
+    cursor.execute('INSERT INTO sessoes (id_sessao, data) VALUES (%s, %s)', (id_sessao, data))
+    mysql.connection.commit()
+    cursor.close()
+    
+    return render_template('username.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
