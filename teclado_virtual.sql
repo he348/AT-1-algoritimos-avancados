@@ -33,7 +33,9 @@ DROP TABLE IF EXISTS `sessoes`;
 CREATE TABLE `sessoes` (
   `id` int(11) NOT NULL,
   `id_sessao` varchar(128) NOT NULL,
-  `data` timestamp NOT NULL DEFAULT current_timestamp()
+  `data` timestamp NOT NULL DEFAULT current_timestamp(),
+  `username` varchar(255),
+  `valores_botao` VARCHAR(50);
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
