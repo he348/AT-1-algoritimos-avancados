@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function() {
             return null;
         }
     }
+    
 
     buscarSenhaDoUsuario(username)
     .then(senhaDoBancoDeDados => {

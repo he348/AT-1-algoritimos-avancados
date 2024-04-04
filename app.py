@@ -128,9 +128,10 @@ def validar_senha():
 @app.route('/senha-do-usuario', methods=['GET'])
 def senha_do_usuario():
     username = request.args.get('username')
+    senha_digitada = request.args.get('senha')
 
-    if not username:
-        return jsonify({"error": "Username não fornecido"}), 400
+    if not username or not senha_digitada:
+        return jsonify({"error": "Credenciais não fornecidas"}), 400
 
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT senha_hash FROM usuarios WHERE username = %s', (username,))
@@ -140,8 +141,6 @@ def senha_do_usuario():
     if not senha_hash:
         return jsonify({"error": "Usuário não encontrado"}), 404
 
-    senha_digitada = request.args.get('senha')  # Senha digitada pelo usuário
-
     # Verifica se a senha digitada corresponde ao hash armazenado no banco de dados
     if verificar_senha(senha_digitada, senha_hash[0]):
         # Senha correta
@@ -149,6 +148,7 @@ def senha_do_usuario():
     else:
         # Senha incorreta
         return jsonify({"error": "Senha incorreta"}), 401
+
 
 # Rota para a primeira tela da aplicação
 @app.route('/username')
