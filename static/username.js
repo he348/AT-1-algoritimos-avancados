@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function() {
         return /[a-zA-Z0-9]/.test(username);
     }
 
+
     // Chama a função verificarUsername sempre que o usuário digitar algo no campo de username
     usernameInput.addEventListener("input", verificarUsername);
 
@@ -32,8 +33,20 @@ document.addEventListener("DOMContentLoaded", function() {
                 .then(response => {
                     if (response.ok) {
                         console.log("Usuário encontrado:", username);
-                        // Se o usuário existe, redirecionar para a tela de inserção de senha com o username na URL
-                        window.location.href = `/senha.html?username=${username}`;
+                        // Se o usuário existe, redirecionar para a rota /gerar-session-token para gerar o token de sessão
+                        fetch(`/gerar-session-token?username=${username}`)
+                            .then(response => response.json())
+                            .then(data => {
+                        // Após obter o token de sessão
+                        const sessionToken = data.sessionToken;
+                        console.log('Token de sessão recebido:', sessionToken);
+                        localStorage.setItem('sessionToken', sessionToken);
+                        window.location.href = `/senha.html?username=${username}&sessionToken=${sessionToken}`;
+
+                            })
+                            .catch(error => {
+                                console.error('Erro ao gerar o token de sessão:', error);
+                            });
                     } else {
                         console.log("Usuário não encontrado:", username);
                         // Se o usuário não existe, exibir uma mensagem de erro
@@ -45,7 +58,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
         }
     });
+    
 
-    // Verificar o username quando a página é carregada
+            // Verificar o username quando a página é carregada
     verificarUsername();
 });

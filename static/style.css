@@ -41,7 +41,6 @@ button {
     cursor: pointer;
     background-color: #d45d02;
     color: #fff;
-
     transition: background-color 0.3s ease;
 }
 
@@ -51,7 +50,6 @@ button {
     opacity: 0.5; /* Opacidade reduzida */
     cursor: not-allowed; /* Cursor não permitido */
 }
-
 
 button:hover {
     background-color: #c24a12;
@@ -77,4 +75,59 @@ button:hover {
     display: block;
     margin-bottom: 5px;
     color: #333;
+}
+
+/* Estilos para os botões gerados */
+.botao-numero {
+    width: 60px; /* Largura dos botões */
+    height: 60px; /* Altura dos botões */
+    margin: 5px; /* Margem entre os botões */
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 20px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #d45d02; /* Cor de fundo laranja */
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+/* Estilo para o botão de apagar */
+.botao-apagar {
+    width: 90px; /* Aumentando a largura do botão */
+    height: 60px; /* Altura do botão de apagar */
+    margin: 5px; /* Margem entre os botões */
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px; /* Reduzindo o tamanho da fonte */
+    text-align: center;
+    cursor: pointer;
+    background-color: #f44336; /* Cor de fundo vermelha */
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+
+/* Posicionamento dos botões */
+#teclado {
+    display: flex; /* Layout flexível */
+    flex-wrap: wrap; /* Quebra de linha automática */
+    justify-content: center; /* Alinhamento central dos botões */
+}
+
+/* Estilo para os botões ao passar o mouse */
+.botao-numero:hover, .botao-apagar:hover {
+    background-color: #c24a12; /* Altera a cor de fundo ao passar o mouse */
+}
+
+/* Ajustes de posicionamento para os botões */
+#teclado .botao-numero {
+    flex-basis: calc(33.33% - 10px); /* Distribui os botões em 3 colunas */
+}
+
+#teclado .botao-apagar {
+    order: 1; /* Move o botão de apagar para a última posição */
+    margin-top: 5px; /* Margem superior para separar do último botão de baixo */
 }

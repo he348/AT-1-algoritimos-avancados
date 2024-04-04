@@ -1,21 +1,20 @@
 from flask import Flask, request, jsonify, render_template
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import JWTManager
 from flask_mysqldb import MySQL
-from flask_bcrypt import Bcrypt
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import InputRequired, Length
-from flask_talisman import Talisman
-from hashlib import sha256
-import os  # Adicionado para gerar a chave secreta
-import hashlib
+from flask_talisman import Talisman 
+import os
 import secrets
 import datetime
+import random
+import json
+import jwt
 
 app = Flask(__name__)
-bcrypt = Bcrypt(app)
 
-app.config['JWT_SECRET_KEY'] = 'your-jwt-secret-key'
+# Gerar uma chave secreta aleatória para JWT
+jwt_secret_key = secrets.token_hex(32)  # 32 bytes (64 caracteres hexadecimais)
+
+app.config['JWT_SECRET_KEY'] = jwt_secret_key
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
@@ -25,145 +24,153 @@ app.config['MYSQL_DB'] = 'teclado_virtual'
 app.config['SECRET_KEY'] = os.urandom(24)
 
 mysql = MySQL(app)
-jwt = JWTManager(app)
+jwt_manager = JWTManager(app)
 
 # Definindo a CSP (Política de Segurança de Conteúdo)
 csp = {
     'default-src': '\'self\'',
     'style-src': '\'self\' https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css',
-    'script-src': '\'self\' https://code.jquery.com/jquery-3.5.1.slim.min.js https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js'
+    'script-src': '\'self\' \'unsafe-inline\' https://code.jquery.com/jquery-3.5.1.slim.min.js https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js'
 }
 
 # Adicionando a extensão Talisman para implementar a CSP
 Talisman(app, content_security_policy=csp)
 
-# Adicionado rota para página inicial (username)
+# Rota para página inicial (username)
 @app.route('/')
 def index():
     return render_template('username.html')
 
-# Adicionado rota para página senha (senha.html)
-@app.route('/senha.html')
-def senha():
-    return render_template('senha.html')
-
-# Essa função irá verificar se a senha digitada pelo usuário corresponde ao hash armazenado no banco de dados
-def verificar_senha(senha_digitada, senha_hash):
-    senha_digitada_hash = sha256(senha_digitada.encode()).hexdigest()
-    return senha_digitada_hash == senha_hash
-
-
-# Rota para fazer login e gerar o token JWT
-@app.route('/login', methods=['POST'])
-def login():
-    username = request.json.get('username', '')
-    password = request.json.get('password', '')
-
-    cursor = mysql.connection.cursor()
-    cursor.execute('SELECT * FROM usuarios WHERE username = %s', (username,))
-    user = cursor.fetchone()
-    cursor.close()
-
-    if not user or not bcrypt.check_password_hash(user[3], password):
-        return jsonify({"msg": "Credenciais inválidas"}), 401
-
-    access_token = create_access_token(identity=username)
-    return jsonify(access_token=access_token), 200
-
-# Rota protegida que requer autenticação com JWT
-@app.route('/protegido', methods=['GET'])
-@jwt_required()
-def protegido():
-    # Obtém a identidade do usuário a partir do token JWT
-    current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
-
-# Rota para verificar se o usuário existe
-@app.route('/verificar-usuario', methods=['GET'])
-def verificar_usuario():
+@app.route('/gerar-session-token', methods=['GET'])
+def gerar_session_token():
+    # Recupera o username da query string
     username = request.args.get('username')
-    app.logger.debug(f'Acessando rota /verificar-usuario para o usuário {username}')
     if not username:
-        app.logger.error('Username não fornecido na solicitação GET')
         return jsonify({"error": "Username não fornecido"}), 400
 
+    # Gera um token de sessão usando JWT
+    session_token = jwt.encode({'username': username}, app.config['JWT_SECRET_KEY'], algorithm='HS256')
+
+    # Retorna o token de sessão gerado
+    print('Token de sessão gerado:', session_token)
+    return jsonify({"sessionToken": session_token}), 200
+
+
+@app.route('/senha.html')
+def senha():
+    username = request.args.get('username')
+    session_token = request.args.get('sessionToken')
+    print('Token de sessão gerado:', session_token)
+
+    if not username:
+        return jsonify({"error": "Username não fornecido"}), 400
+
+    if not session_token:
+        return jsonify({"error": "Token de sessão não fornecido"}), 400
+
+
+    # Adicione instruções de depuração para verificar os valores
+    print('Username:', username)
+    print('Token de sessão:', session_token)
+
+    # Gerar e inserir sessão no banco de dados apenas quando entrar na tela de senha
+    id_sessao = session_token
+    data = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print('ID da sessão:', id_sessao)
+    print('Data da sessão:', data)
+    
     cursor = mysql.connection.cursor()
-    cursor.execute('SELECT COUNT(*) FROM usuarios WHERE username = %s', (username,))
-    count = cursor.fetchone()[0]
+    cursor.execute('INSERT INTO sessoes (id_sessao, data, username) VALUES (%s, %s, %s)', (id_sessao, data, username))
+    mysql.connection.commit()
+    cursor.close()
+    
+    return render_template('senha.html', username=username)
+
+@app.route('/inserir-valores-botao', methods=['POST'])
+def inserir_valores_botao():
+    # Recebe os dados enviados pelo frontend
+    dados = request.json
+    username = dados.get('username', '')
+    valores_botao = json.dumps(dados.get('valoresBotao', []))
+    session_token = dados.get('sessionToken')  # Obter o token de sessão do corpo da requisição
+
+    # Verificar se o token de sessão está presente
+    if not session_token:
+        return jsonify({"error": "Token de sessão não fornecido"}), 400
+
+    # Insira os valores dos botões no banco de dados associados ao token de sessão e ao usuário
+    cursor = mysql.connection.cursor()
+    cursor.execute('UPDATE sessoes SET valores_botao = %s WHERE username = %s AND id_sessao = %s', (valores_botao, username, session_token))
+    mysql.connection.commit()
     cursor.close()
 
-    if count > 0:
-        app.logger.info('Usuário encontrado: %s', username)
-        return jsonify({"msg": "Usuário encontrado"}), 200
-    else:
-        app.logger.warning('Usuário não encontrado: %s', username)
-        return jsonify({"msg": "Usuário não encontrado"}), 404
+    return jsonify({"msg": "Valores dos botões inseridos com sucesso!"}), 200
 
+# Função para gerar uma senha aleatória para os botões
+def gerar_senha_aleatoria():
+    senha_aleatoria = []
+    for _ in range(5):
+        senha_aleatoria.append([random.randint(0, 9), random.randint(0, 9)])
+    return senha_aleatoria
 
-# Rota para validar a senha recebida do frontend
-@app.route('/validar-senha', methods=['POST'])
-def validar_senha():
-    username = request.json.get('username', '')
-    senha_digitada = request.json.get('senha', '')
+# Rota para gerar e retornar a senha aleatória para os botões
+@app.route('/senha-aleatoria', methods=['GET'])
+def senha_aleatoria():
+    # Recuperar o username da query string
+    username = request.args.get('username')
+    if not username:
+        return jsonify({"error": "Username não fornecido"}), 400
 
+    # Gerar senha aleatória com base no username
+    senha_aleatoria = gerar_senha_aleatoria()
+    return jsonify(senha_aleatoria)
+
+# Rota para autenticar a senha
+@app.route('/autenticar-senha', methods=['POST'])
+def autenticar_senha():
+    # Recebe os dados enviados pelo frontend
+    dados = request.json
+    username = dados.get('username', '')
+    senha_digitada = dados.get('senha', [])
+
+    # Recupera a senha hash do usuário do banco de dados
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT senha_hash FROM usuarios WHERE username = %s', (username,))
     result = cursor.fetchone()
 
+    # Se não encontrar o usuário, retorna senha incorreta
     if result is None:
-        return jsonify({"msg": "Usuário não encontrado"}), 404
+        return jsonify({"msg": "Senha incorreta"}), 401
 
+    # Verifica se a senha digitada está correta
     senha_hash = result[0]
-
-    # Verifica se o hash da senha armazenada no banco de dados corresponde à senha fornecida
     if senha_digitada == senha_hash:
         # Senha correta
-        access_token = create_access_token(identity=username)
-        return jsonify(access_token=access_token), 200
+        return jsonify({"msg": "Acesso concedido"}), 200
     else:
         # Senha incorreta
         return jsonify({"msg": "Senha incorreta"}), 401
-
-# Rota para recuperar a senha do usuário
-@app.route('/senha-do-usuario', methods=['GET'])
-def senha_do_usuario():
+    
+    # Rota para verificar se o usuário existe
+@app.route('/verificar-usuario', methods=['GET'])
+def verificar_usuario():
+    # Recupera o username da query string
     username = request.args.get('username')
-    senha_digitada = request.args.get('senha')
+    if not username:
+        return jsonify({"error": "Username não fornecido"}), 400
 
-    if not username or not senha_digitada:
-        return jsonify({"error": "Credenciais não fornecidas"}), 400
-
+    # Consulta ao banco de dados para verificar se o usuário existe
     cursor = mysql.connection.cursor()
-    cursor.execute('SELECT senha_hash FROM usuarios WHERE username = %s', (username,))
-    senha_hash = cursor.fetchone()
+    cursor.execute('SELECT COUNT(*) FROM usuarios WHERE username = %s', (username,))
+    result = cursor.fetchone()
     cursor.close()
 
-    if not senha_hash:
-        return jsonify({"error": "Usuário não encontrado"}), 404
-
-    # Verifica se a senha digitada corresponde ao hash armazenado no banco de dados
-    if verificar_senha(senha_digitada, senha_hash[0]):
-        # Senha correta
-        return jsonify({"senha": senha_digitada}), 200
+    # Se o usuário existir, retorna 200 OK
+    if result[0] > 0:
+        return jsonify({"msg": "Usuário encontrado"}), 200
     else:
-        # Senha incorreta
-        return jsonify({"error": "Senha incorreta"}), 401
-
-
-# Rota para a primeira tela da aplicação
-@app.route('/username')
-def username():
-    # Gerar um ID de sessão aleatório
-    id_sessao = secrets.token_urlsafe(16)
-    data = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Inserir o ID de sessão na tabela de sessões
-    cursor = mysql.connection.cursor()
-    cursor.execute('INSERT INTO sessoes (id_sessao, data) VALUES (%s, %s)', (id_sessao, data))
-    mysql.connection.commit()
-    cursor.close()
-    
-    return render_template('username.html')
+        # Se o usuário não existir, retorna 404 Not Found
+        return jsonify({"error": "Usuário não encontrado"}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)

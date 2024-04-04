@@ -1,3 +1,4 @@
+<!-- senha.html -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -9,13 +10,19 @@
 <body>
     <div class="container">
         <h1>Inserir Senha</h1>
-        <input type="text" id="senha-digitada" readonly>
-        <input type="hidden" id="senha-digitada-input">
+        <input type="text" id="senha-digitada-input" readonly> <!-- Corrigido o ID aqui -->
         <div id="teclado" class="teclado"></div>
         <button class="botao-apagar" id="botao-apagar">Apagar</button>
         <button class="botao-acessar" id="botao-acessar-senha">Acessar</button>
-        
     </div>
     <script src="{{ url_for('static', filename='senha.js') }}"></script>
+    <script>
+        // Chama a função para gerar os botões de senhas aleatórias ao carregar a página
+        document.addEventListener("DOMContentLoaded", function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const username = urlParams.get('username');
+            gerarBotoesSenhasAleatorias(username);
+        });
+    </script>
 </body>
 </html>
