@@ -66,7 +66,7 @@ def senha():
         return jsonify({"error": "Username não fornecido"}), 400
 
     if not session_token:
-        return jsonify({"error": "Token de sessão não fornecido"}), 400
+        return jsonify({"error": "Token de sessao nao fornecido"}), 400
 
 
     # Adicione instruções de depuração para verificar os valores
