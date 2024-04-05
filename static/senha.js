@@ -25,6 +25,8 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    let valoresBotao = [];
+
     // Função para gerar botões com senhas aleatórias
     function gerarBotoesSenhasAleatorias(username, sessionToken) {
         const numeros = Array.from({length: 10}, (_, i) => i).sort(() => Math.random() - 0.5);
@@ -38,9 +40,14 @@ document.addEventListener("DOMContentLoaded", function() {
             const botao = document.createElement("button");
             botao.className = "botao-numero";
             botao.textContent = `${par[0]} ou ${par[1]}`;
+            botao.value = `${par[0]} , ${par[1]}`; // Adiciona o valor do botão com o formato "x ou y"
             botao.addEventListener("click", function() {
-                if (senhaDigitadaInput.value.length < 5) {
-                    senhaDigitadaInput.value += `${par[0]} ou ${par[1]}, `;
+                if (senhaDigitadaInput.value.length < 4) {
+                    // Insere apenas um valor do par de botões no campo de senha visualmente
+                    senhaDigitadaInput.value += botao.textContent.includes(par[0]) ? par[0] : par[1];
+                    // Adiciona o par de valores ao array de valoresBotao
+                    valoresBotao.push(par);
+                    console.log('Valores do par de botões:', par); // Log dos valores do par de botões
                 }
             });
             teclado.appendChild(botao);
@@ -59,30 +66,35 @@ document.addEventListener("DOMContentLoaded", function() {
     // Chama a função para gerar os botões com a senha aleatória
     gerarBotoesSenhasAleatorias(username, sessionToken);
 
-    // Evento de clique no botão de acessar senha
-    botaoAcessarSenha.addEventListener("click", function() {
-        const senhaDigitada = senhaDigitadaInput.value.trim();
-        console.log('Senha digitada:', senhaDigitada);
-        fetch('/autenticar-senha', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username: username, senha: senhaDigitada })
-        })
-        .then(response => {
-            return response.json();
-        })
-        .then(data => {
-            alert(data.msg);
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-        });
+ // Evento de clique no botão de acessar senha
+botaoAcessarSenha.addEventListener("click", function() {
+    const senhaDigitada = senhaDigitadaInput.value.trim(); // Defina a variável aqui
+    console.log('Valores digitados:', valoresBotao);
+    fetch('/autenticar-senha', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: username, valoresDigitados: valoresBotao })
+    })
+    .then(response => {
+        return response.json();
+    })
+    .then(data => {
+        alert(data.msg);
+    })
+    .catch(error => {
+        console.error('Erro:', error);
     });
-
+});
     // Evento de clique no botão de apagar
     botaoApagar.addEventListener("click", function() {
-        senhaDigitadaInput.value = senhaDigitadaInput.value.slice(0, -1);
+        // Verifica se há caracteres para apagar
+        if (senhaDigitadaInput.value.length > 0) {
+            // Remove o último caractere do campo de senha visualmente
+            senhaDigitadaInput.value = senhaDigitadaInput.value.slice(0, -1);
+            // Remove o último par de valores do array valoresBotao
+            valoresBotao.pop();
+        }
     });
 });

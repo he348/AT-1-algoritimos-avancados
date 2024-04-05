@@ -60,7 +60,7 @@ DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE `usuarios` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `senha_hash` varchar(128) NOT NULL
+  `senha_hash` varchar(4) NOT NULL CHECK (LENGTH(`senha_hash`) = 4)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -72,7 +72,7 @@ CREATE TABLE `usuarios` (
 --
 
 INSERT INTO `usuarios` (`username`, `senha_hash`) VALUES
-('admin', PASSWORD('1234'));
+('admin2', '1234');
 
 --
 -- Índices para tabelas despejadas

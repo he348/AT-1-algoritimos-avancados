@@ -92,7 +92,8 @@ def inserir_valores_botao():
     username = dados.get('username', '')
     valores_botao = json.dumps(dados.get('valoresBotao', []))
     session_token = dados.get('sessionToken')  # Obter o token de sessão do corpo da requisição
-    
+
+   
     # Verificar se o token de sessão está presente
     if not session_token:
         return jsonify({"error": "Token de sessão não fornecido"}), 400
@@ -108,50 +109,58 @@ def inserir_valores_botao():
     else:
         # Se o registro existe, atualize os valores dos botões na tabela 'sessoes'
         cursor.execute('UPDATE sessoes SET valores_botao = %s WHERE username = %s AND id_sessao = %s', (valores_botao, username, session_token))
-        
-    
+            
     mysql.connection.commit()
     cursor.close()
-
     return jsonify({"msg": "Valores dos botões inseridos com sucesso!"}), 200
 
 # Rota para autenticar a senha
 @app.route('/autenticar-senha', methods=['POST'])
 def autenticar_senha():
-    # Recebe os dados enviados pelo frontend
     dados = request.json
     username = dados.get('username', '')
-    senha_digitada = dados.get('senha', '')
+    valores_digitados = dados.get('valoresDigitados', [])
 
-    # Recupera a senha hash do usuário do banco de dados
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT senha_hash FROM usuarios WHERE username = %s', (username,))
     result = cursor.fetchone()
 
-    # Se não encontrar o usuário, retorna senha incorreta
     if result is None:
         return jsonify({"msg": "Senha incorreta"}), 401
 
-    # Verifica se a senha digitada corresponde ao hash armazenado
     senha_hash_armazenado = result[0]
-    senha_digitada_hash = hashlib.sha256(senha_digitada.encode()).hexdigest()
 
-    # Imprime as senhas hash no console do servidor Flask
-    print('Senha hash digitada pelo usuário:', senha_digitada_hash)
+    # Convertendo a senha_hash_armazenado para uma lista de dígitos inteiros
+    senha_lista = [int(digito) for digito in senha_hash_armazenado]
+
+    # Comparando os valores correspondentes da senha digitada com a senha armazenada
+    valores_digitados_comparaveis = []
+
+    for val in valores_digitados:
+        for digito in senha_lista:
+            if int(val[0]) == digito or int(val[1]) == digito:
+                valores_digitados_comparaveis.append(digito)
+                break
+        else:
+            valores_digitados_comparaveis.append(senha_lista[0])
+
+    print('Senha digitada pelo usuário:', valores_digitados_comparaveis)
     print('Senha hash armazenado no banco de dados:', senha_hash_armazenado)
+    print('Senha armazenada em forma de lista:', senha_lista)
 
-    if senha_digitada_hash == senha_hash_armazenado:
-        # Senha correta
+    # Comparando as duas listas
+    if valores_digitados_comparaveis == senha_lista:
         return jsonify({"msg": "Acesso concedido"}), 200
     else:
-        # Senha incorreta
         dados = {"msg": "Senha incorreta",
-             "senha_digitada_hash": str(senha_digitada_hash),
-             "senha_hash_armazenado": str(senha_hash_armazenado)}
+                 "senha_digitada_hash": str(valores_digitados_comparaveis),
+                 "senha_hash_armazenado": str(senha_hash_armazenado)}
         return jsonify(dados), 401
-    
 
-    # Rota para verificar se o usuário existe
+
+
+    
+# Rota para verificar se o usuário existe
 @app.route('/verificar-usuario', methods=['GET'])
 def verificar_usuario():
     # Recupera o username da query string
