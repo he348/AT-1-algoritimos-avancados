@@ -145,7 +145,10 @@ def autenticar_senha():
         return jsonify({"msg": "Acesso concedido"}), 200
     else:
         # Senha incorreta
-        return jsonify({"msg": "Senha incorreta"}), 401
+        dados = {"msg": "Senha incorreta",
+             "senha_digitada_hash": str(senha_digitada_hash),
+             "senha_hash_armazenado": str(senha_hash_armazenado)}
+        return jsonify(dados), 401
     
 
     # Rota para verificar se o usuário existe
