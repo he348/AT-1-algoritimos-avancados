@@ -60,7 +60,7 @@ DROP TABLE IF EXISTS `usuarios`;
 CREATE TABLE `usuarios` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `senha_hash` varchar(4) NOT NULL CHECK (LENGTH(`senha_hash`) = 4)
+  `senha_hash` int(4) NOT NULL CHECK (LENGTH(`senha_hash`) = 4)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
