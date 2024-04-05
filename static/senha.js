@@ -4,30 +4,33 @@ document.addEventListener("DOMContentLoaded", function() {
     const senhaDigitadaInput = document.getElementById("senha-digitada-input");
     const botaoApagar = document.getElementById("botao-apagar");
 
+    // Obtém o token de sessão do localStorage
+    const sessionToken = localStorage.getItem('sessionToken');
     console.log('Token de sessão:', sessionToken);
-    // Função para enviar os valores dos botões para o servidor e armazená-los no banco de dados
-    function inserirValoresBotao(username, valoresBotao, sessionToken) {
-        fetch('/inserir-valores-botao', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ username: username, valoresBotao: valoresBotao, sessionToken: sessionToken })
-        })
-        .then(response => {
-            if (response.ok) {
-                console.log('Valores dos botões inseridos com sucesso!');
-            } else {
-                console.error('Erro ao inserir valores dos botões:', response.statusText);
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao inserir valores dos botões:', error);
-        });
-    }
+
+  // Função para enviar os valores dos botões para o servidor e armazená-los no banco de dados
+function inserirValoresBotao(username, valoresBotao, sessionToken) {
+    fetch('/inserir-valores-botao', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: username, valoresBotao: valoresBotao, sessionToken: sessionToken })
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log('Valores dos botões inseridos com sucesso!');
+        } else {
+            console.error('Erro ao inserir valores dos botões:', response.statusText);
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao inserir valores dos botões:', error);
+    });
+}
 
     // Função para gerar botões com senhas aleatórias
-    function gerarBotoesSenhasAleatorias(username, sessionToken) {
+    function gerarBotoesSenhasAleatorias(username) {
         const numeros = Array.from({length: 10}, (_, i) => i).sort(() => Math.random() - 0.5);
         const senha = [];
         for (let i = 0; i < 10; i += 2) {
@@ -54,17 +57,13 @@ document.addEventListener("DOMContentLoaded", function() {
     // Obtém o username da URL
     const username = new URLSearchParams(window.location.search).get("username");
 
-    // Obtém o token de sessão do localStorage
-    const sessionToken = localStorage.getItem('sessionToken');
-
     // Chama a função para gerar os botões com a senha aleatória
-    gerarBotoesSenhasAleatorias(username, sessionToken);
+    gerarBotoesSenhasAleatorias(username);
 
     // Evento de clique no botão de acessar senha
     botaoAcessarSenha.addEventListener("click", function() {
         const senhaDigitada = senhaDigitadaInput.value.trim();
         console.log('Senha digitada:', senhaDigitada);
-
         fetch('/autenticar-senha', {
             method: 'POST',
             headers: {

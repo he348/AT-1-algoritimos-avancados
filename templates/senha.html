@@ -19,9 +19,10 @@
     <script>
         // Chama a função para gerar os botões de senhas aleatórias ao carregar a página
         document.addEventListener("DOMContentLoaded", function() {
+            const sessionToken = localStorage.getItem('sessionToken');
+            console.log('Token de sessão recuperado:', sessionToken);
             const urlParams = new URLSearchParams(window.location.search);
             const username = urlParams.get('username');
-            gerarBotoesSenhasAleatorias(username);
         });
     </script>
 </body>

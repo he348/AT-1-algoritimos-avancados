@@ -52,7 +52,7 @@ def gerar_session_token():
     session_token = jwt.encode({'username': username}, app.config['JWT_SECRET_KEY'], algorithm='HS256')
 
     # Retorna o token de sessão gerado
-    print('Token de sessão gerado:', session_token)
+    print('Token de sessão gerado no print da gerar-session-tolen:', session_token)
     return jsonify({"sessionToken": session_token}), 200
 
 
@@ -60,7 +60,7 @@ def gerar_session_token():
 def senha():
     username = request.args.get('username')
     session_token = request.args.get('sessionToken')
-    print('Token de sessão gerado:', session_token)
+    print('Token de sessão gerado da rota senha.html:', session_token)
 
     if not username:
         return jsonify({"error": "Username não fornecido"}), 400
@@ -93,37 +93,27 @@ def inserir_valores_botao():
     username = dados.get('username', '')
     valores_botao = json.dumps(dados.get('valoresBotao', []))
     session_token = dados.get('sessionToken')  # Obter o token de sessão do corpo da requisição
-
+    
     # Verificar se o token de sessão está presente
     if not session_token:
         return jsonify({"error": "Token de sessão não fornecido"}), 400
 
-    # Insira os valores dos botões no banco de dados associados ao token de sessão e ao usuário
+    # Verificar se o registro já existe na tabela 'sessoes'
     cursor = mysql.connection.cursor()
-    cursor.execute('UPDATE sessoes SET valores_botao = %s WHERE username = %s AND id_sessao = %s', (valores_botao, username, session_token))
+    cursor.execute('SELECT COUNT(*) FROM sessoes WHERE username = %s AND id_sessao = %s', (username, session_token))
+    result = cursor.fetchone()
+    
+    if result[0] == 0:
+        # Se o registro não existe, insira-o na tabela 'sessoes'
+        cursor.execute('INSERT INTO sessoes (username, valores_botao) VALUES (%s, %s, %s)', (session_token, username, valores_botao))
+    else:
+        # Se o registro existe, atualize os valores dos botões na tabela 'sessoes'
+        cursor.execute('UPDATE sessoes SET valores_botao = %s WHERE username = %s AND id_sessao = %s', (valores_botao, username, session_token))
+    
     mysql.connection.commit()
     cursor.close()
 
     return jsonify({"msg": "Valores dos botões inseridos com sucesso!"}), 200
-
-# Função para gerar uma senha aleatória para os botões
-def gerar_senha_aleatoria():
-    senha_aleatoria = []
-    for _ in range(5):
-        senha_aleatoria.append([random.randint(0, 9), random.randint(0, 9)])
-    return senha_aleatoria
-
-# Rota para gerar e retornar a senha aleatória para os botões
-@app.route('/senha-aleatoria', methods=['GET'])
-def senha_aleatoria():
-    # Recuperar o username da query string
-    username = request.args.get('username')
-    if not username:
-        return jsonify({"error": "Username não fornecido"}), 400
-
-    # Gerar senha aleatória com base no username
-    senha_aleatoria = gerar_senha_aleatoria()
-    return jsonify(senha_aleatoria)
 
 # Rota para autenticar a senha
 @app.route('/autenticar-senha', methods=['POST'])
@@ -151,6 +141,7 @@ def autenticar_senha():
         # Senha incorreta
         return jsonify({"msg": "Senha incorreta"}), 401
     
+
     # Rota para verificar se o usuário existe
 @app.route('/verificar-usuario', methods=['GET'])
 def verificar_usuario():

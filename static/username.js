@@ -37,12 +37,13 @@ document.addEventListener("DOMContentLoaded", function() {
                         fetch(`/gerar-session-token?username=${username}`)
                             .then(response => response.json())
                             .then(data => {
-                        // Após obter o token de sessão
-                        const sessionToken = data.sessionToken;
-                        console.log('Token de sessão recebido:', sessionToken);
-                        localStorage.setItem('sessionToken', sessionToken);
-                        window.location.href = `/senha.html?username=${username}&sessionToken=${sessionToken}`;
-
+                                // Após obter o token de sessão
+                                const sessionToken = data.sessionToken;
+                                console.log('Token de sessão recebido:', sessionToken);
+                                // Salva o token de sessão no localStorage
+                                localStorage.setItem('sessionToken', sessionToken);
+                                // Redireciona para a página senha.html incluindo o sessionToken na URL
+                                window.location.href = `/senha.html?username=${username}&sessionToken=${sessionToken}`;
                             })
                             .catch(error => {
                                 console.error('Erro ao gerar o token de sessão:', error);
@@ -58,6 +59,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
         }
     });
+    
     
 
             // Verificar o username quando a página é carregada
