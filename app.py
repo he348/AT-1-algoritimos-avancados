@@ -5,7 +5,7 @@ from flask_talisman import Talisman
 import os
 import secrets
 import datetime
-import random
+import hashlib
 import json
 import jwt
 
@@ -68,19 +68,18 @@ def senha():
     if not session_token:
         return jsonify({"error": "Token de sessao nao fornecido"}), 400
 
-
-    # Adicione instruções de depuração para verificar os valores
+    # Gerar e inserir sessão no banco de dados apenas quando entrar na tela de senha
+    data = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print('ID da sessão:', session_token)
+    print('Data da sessão:', data)
     print('Username:', username)
     print('Token de sessão:', session_token)
 
-    # Gerar e inserir sessão no banco de dados apenas quando entrar na tela de senha
-    id_sessao = session_token
-    data = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print('ID da sessão:', id_sessao)
-    print('Data da sessão:', data)
+    # Defina valores_botao como uma string vazia
+    valores_botao = ''
     
     cursor = mysql.connection.cursor()
-    cursor.execute('INSERT INTO sessoes (id_sessao, data, username) VALUES (%s, %s, %s)', (id_sessao, data, username))
+    cursor.execute('INSERT INTO sessoes (id_sessao, username, valores_botao) VALUES (%s, %s, %s)', (session_token, username, valores_botao))
     mysql.connection.commit()
     cursor.close()
     
@@ -109,6 +108,7 @@ def inserir_valores_botao():
     else:
         # Se o registro existe, atualize os valores dos botões na tabela 'sessoes'
         cursor.execute('UPDATE sessoes SET valores_botao = %s WHERE username = %s AND id_sessao = %s', (valores_botao, username, session_token))
+        
     
     mysql.connection.commit()
     cursor.close()
@@ -121,7 +121,7 @@ def autenticar_senha():
     # Recebe os dados enviados pelo frontend
     dados = request.json
     username = dados.get('username', '')
-    senha_digitada = dados.get('senha', [])
+    senha_digitada = dados.get('senha', '')
 
     # Recupera a senha hash do usuário do banco de dados
     cursor = mysql.connection.cursor()
@@ -132,9 +132,15 @@ def autenticar_senha():
     if result is None:
         return jsonify({"msg": "Senha incorreta"}), 401
 
-    # Verifica se a senha digitada está correta
-    senha_hash = result[0]
-    if senha_digitada == senha_hash:
+    # Verifica se a senha digitada corresponde ao hash armazenado
+    senha_hash_armazenado = result[0]
+    senha_digitada_hash = hashlib.sha256(senha_digitada.encode()).hexdigest()
+
+    # Imprime as senhas hash no console do servidor Flask
+    print('Senha hash digitada pelo usuário:', senha_digitada_hash)
+    print('Senha hash armazenado no banco de dados:', senha_hash_armazenado)
+
+    if senha_digitada_hash == senha_hash_armazenado:
         # Senha correta
         return jsonify({"msg": "Acesso concedido"}), 200
     else:
@@ -162,6 +168,7 @@ def verificar_usuario():
     else:
         # Se o usuário não existir, retorna 404 Not Found
         return jsonify({"error": "Usuário não encontrado"}), 404
+    
 
 if __name__ == '__main__':
     app.run(debug=True)

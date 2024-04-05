@@ -71,8 +71,8 @@ CREATE TABLE `usuarios` (
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `username`, `senha_hash`) VALUES
-(1, 'admin', '*A4B6157319038724E3560894F7F932C8886EBFCF');
+INSERT INTO `usuarios` (`username`, `senha_hash`) VALUES
+('admin', PASSWORD('1234'));
 
 --
 -- Índices para tabelas despejadas
